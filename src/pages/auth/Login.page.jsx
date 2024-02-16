@@ -46,8 +46,8 @@ const LoginPage = () => {
             ) : (
               <div className=" flex flex-col gap-4">
                 <Header
-                  header={"Welcome From CA!"}
-                  text={"Create an account for amazing contact management. "}
+                  header={"Welcome Back From CA!"}
+                  text={"Login an account for amazing contact management. "}
                 />
                 {error && <Error error={error} />}
 
@@ -70,7 +70,7 @@ const LoginPage = () => {
                       placeholder="Enter Your Password"
                     />
 
-                    <Button type="submit">Register</Button>
+                    <Button type="submit">Login</Button>
 
                     <Navigator
                       path={"register"}

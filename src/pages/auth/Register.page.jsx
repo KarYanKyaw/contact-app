@@ -1,5 +1,4 @@
-
-import { FormInput, Header, Loading, Navigator, Wrapper } from "@/components";
+import { FormInput, Header, Loading, Navigator, Wrapper ,Error} from "@/components";
 import PreventRoutes from "@/components/PreventRoutes.component";
 import { Button } from "@/components/ui/button";
 import { registerAction } from "@/store/action/auth.action";
@@ -7,9 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 const RegisterPage = () => {
-  
   const { loading, error, data } = useSelector((store) => store.auth);
-
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     name: "",
@@ -27,6 +24,7 @@ const RegisterPage = () => {
   const handleInputChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+
   useEffect(() => {
     if (data) {
       nav("/home");

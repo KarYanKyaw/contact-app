@@ -1,35 +1,49 @@
-import { ContactTable, Header, Loading } from "@/components";
-import { getAllContacts } from "@/service/contact.service";
+import { ContactTable, Error, Header, Loading } from "@/components";
+import { getAllContacts } from "@/store/action/contact.action";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 const ViewContactPage = () => {
-  const [items, setItems] = useState({
-    loading: true,
-    data: null,
-    error: null,
-  });
+  const { loading, data, error } = useSelector((store) => store.contact);
+  const dispatch = useDispatch();
+  console.log(error);
   useEffect(() => {
     (async () => {
-      const res = await getAllContacts();
-      if (res.error) {
-        console.log("err");
-      } else {
-        setItems((prev) => ({ ...prev, loading: false, data: res }));
-      }
+      const res = await getAllContacts(dispatch);
+      localStorage.setItem("data", JSON.stringify(data));
     })();
-  }, []);
+  },[]);
 
   return (
     <div className=" flex items-center py-6 gap-3 flex-col">
       <>
-        {items.loading ? (
-          <Loading />
-        ) : (
+        {loading ? (
           <>
-            <div className="mb-3">
-              <Header header={"Your Contact List"} />
-            </div>
-            <ContactTable data={items.data} />
+            <Loading />
+            {loading}
+          </>
+        ) : (
+          // <h1>not loading {"data"}</h1>
+          <>
+            {error ? (
+              <Error error={"line ma kg"} />
+            ) : (
+              <>
+                {data === null ? (
+                  <Loading />
+                ) : (
+                  <div className="mb-3">
+                    <Header header={"Your Contact List"} />
+
+                    <ContactTable
+                      data={
+                        data || JSON.parse(localStorage.getItem("data")) || null
+                      }
+                    />
+                  </div>
+                )}
+              </>
+            )}
           </>
         )}
       </>

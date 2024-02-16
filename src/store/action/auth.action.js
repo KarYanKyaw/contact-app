@@ -19,7 +19,7 @@ export const loginAction = async (dispatch, formData) => {
     const res = await api.post("/login", formData);
     if (!res.data.success) {
       console.log("false");
-      dispatch({ type: "error", payload: res.data.message });
+      throw new Error(res.data);
     } else {
       console.log("success");
       localStorage.setItem("auth", res.data.token);
@@ -27,10 +27,15 @@ export const loginAction = async (dispatch, formData) => {
     }
     return res;
   } catch (e) {
-    console.log(e);
+    console.log(e?.response?.data);
+    dispatch({ type: "error", payload: e?.response?.data.message});
   }
 };
 
 export const logoutAction = async (dispatch) => {
   dispatch({ type: "logout" });
+};
+
+export const navigate = () => {
+  dispatch({ type: "reset" });
 };

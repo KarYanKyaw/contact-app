@@ -13,10 +13,9 @@ const CreateContactPage = () => {
     email: "",
     address: "",
   });
-  const { data, loading, error } = useSelector((store) => store.contact);
-
+  const { added, loading, error } = useSelector((store) => store.contact);
   const dispatch = useDispatch();
-
+  console.log(error);
   const handleFormDataChange = (e) =>
     setFormData((pre) => ({ ...pre, [e.target.name]: e.target.value }));
 
@@ -69,7 +68,7 @@ const CreateContactPage = () => {
               name="address"
             />
             <Button className=" w-full block" type="submit">
-              Create Contact
+              Create Contact Now
             </Button>
           </form>
         </>

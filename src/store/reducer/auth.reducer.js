@@ -19,6 +19,9 @@ export const authReducer = (store = initialState, action) => {
     case "error": {
       return { ...store, loading: false, error: action.payload };
     }
+    case "reset": {
+      return { ...store, loading: false, error: null };
+    }
     case "logout": {
       localStorage.removeItem("auth");
       return { ...store, loading: false, data: null };

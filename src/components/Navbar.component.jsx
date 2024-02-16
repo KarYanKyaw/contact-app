@@ -1,19 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Wrapper } from ".";
 import ModalBox from "./ModalBox.component";
 import { logoutAction } from "@/store/action/auth.action";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
+import { navigateHome } from "@/store/action/contact.action";
 
 const Navbar = () => {
+  const [route, setRoute] = useState(null);
   const dispatch = useDispatch();
   const nav = useNavigate();
-  const { data } = useSelector((store) => store.auth);
+
   const comfirmLogout = () => {
     logoutAction(dispatch);
     nav("/");
   };
+  const handleClick = (type) => {
+    setRoute(type);
+  };
+  useEffect(() => {
+    if (route === "home") {
+      nav("/home");
+    } else if (route === "create") {
+      nav("/home/create");
+    }
+    navigateHome(dispatch);
+  }, [route]);
 
   return (
     <div className="bg-neutral-200 ">
@@ -23,8 +36,16 @@ const Navbar = () => {
             The Contact App
           </p>
           <div className=" flex gap-3">
-            <Button variant="link" onClick={() => nav("/home")} className=" text-lg">Home</Button>
-            <Button onClick={() => nav("/home/create")}>Create Contact</Button>
+            <Button
+              variant="link"
+              onClick={() => handleClick("home")}
+              className=" text-lg"
+            >
+              Home
+            </Button>
+            <Button onClick={() => handleClick("create")}>
+              Create Contact
+            </Button>
             <ModalBox
               trigger={"Log Out"}
               title={"Are you sure you want to log out?"}
