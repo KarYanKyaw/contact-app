@@ -10,22 +10,25 @@ import { navigateHome } from "@/store/action/contact.action";
 const Navbar = () => {
   const [route, setRoute] = useState(null);
   const dispatch = useDispatch();
+
   const nav = useNavigate();
 
   const comfirmLogout = () => {
     logoutAction(dispatch);
     nav("/");
   };
+
   const handleClick = (type) => {
     setRoute(type);
+    navigateHome(dispatch);
   };
+
   useEffect(() => {
     if (route === "home") {
       nav("/home");
     } else if (route === "create") {
       nav("/home/create");
     }
-    navigateHome(dispatch);
   }, [route]);
 
   return (
@@ -47,6 +50,7 @@ const Navbar = () => {
               Create Contact
             </Button>
             <ModalBox
+              variant="secondary"
               trigger={"Log Out"}
               title={"Are you sure you want to log out?"}
               description={"You can still close the site without logging out!"}

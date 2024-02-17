@@ -1,29 +1,50 @@
 import { Error, FormInput, Header, Loading, Wrapper } from "@/components";
 import { Button } from "@/components/ui/button";
-import { createContact } from "@/store/action/contact.action";
+import {
+  createContact,
+  editContact,
+  navigateHome,
+} from "@/store/action/contact.action";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const CreateContactPage = () => {
+  const { loading, error } = useSelector((store) => store.contact);
+
   const nav = useNavigate();
+  const location = useLocation();
+  const editMode = location.state?.edit;
+
+  useEffect(() => {
+    if (editMode) {
+      const { name, email, phone, address } = location.state.data;
+      setFormData({ name, email: email || "", phone, address: address || "" });
+    }
+  }, [location]);
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
     address: "",
   });
-  const { added, loading, error } = useSelector((store) => store.contact);
   const dispatch = useDispatch();
-  console.log(error);
+
   const handleFormDataChange = (e) =>
     setFormData((pre) => ({ ...pre, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await createContact(dispatch, formData);
-    if (res.data) {
-      nav("/");
+    let res;
+    if (location.state?.edit) {
+      res = await editContact(dispatch, location.state.data.id, formData);
+    } else {
+      res = await createContact(dispatch, formData);
+    }
+    if (res?.status === 200) {
+      nav("/home");
+      navigateHome(dispatch);
     }
   };
   return (
@@ -68,7 +89,7 @@ const CreateContactPage = () => {
               name="address"
             />
             <Button className=" w-full block" type="submit">
-              Create Contact Now
+              {editMode ? "Edit" : "Create"} Contact Now
             </Button>
           </form>
         </>

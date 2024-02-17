@@ -11,7 +11,6 @@ export const contactReducer = (store = initialState, action) => {
       return { ...store, loading: true, data: null };
     }
     case "getAll": {
-      console.log(action.payload);
       return { ...store, loading: false, data: action.payload };
     }
     case "addNew":
@@ -19,8 +18,14 @@ export const contactReducer = (store = initialState, action) => {
     case "error": {
       return { ...store, loading: false, error: action.payload };
     }
+    case "edit": {
+      return { ...store, loading: false, data: action.payload };
+    }
+    case "delete": {
+      return { ...store, loading: false, data: action.payload };
+    }
     case "reset": {
-      return { data: null, loading: false, error: null };
+      return { ...store, loading: false, error: null };
     }
     default: {
       return store;

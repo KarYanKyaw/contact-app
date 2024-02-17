@@ -7,8 +7,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
+import { deleteContact } from "@/store/action/contact.action";
+import { useDispatch } from "react-redux";
+import ModalBox from "./ModalBox.component";
+import { Button } from "./ui/button";
 
-const ActionTrigger = () => {
+const ActionTrigger = ({ data }) => {
+  const nav = useNavigate();
+  const handleEdit = () => {
+    nav("/home/create", { state: { edit: true, data: data } });
+  };
+  const dispatch = useDispatch();
+  const handleDelete = () => {
+    deleteContact(dispatch, data.id);
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -28,11 +41,20 @@ const ActionTrigger = () => {
         </svg>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem >
-          Delete
-        </DropdownMenuItem>
         <DropdownMenuItem>
-          Edit
+          <ModalBox
+          variant="ghost"
+            confirm={"Yes, Delete This!"}
+            fun={handleDelete}
+            trigger={"Delete"}
+            title={"Are you sure to delete this contact?"}
+            description={"This Action can't be undone"}
+          />
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleEdit()}>
+          <Button variant={"ghost"}>
+            Edit
+          </Button>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
