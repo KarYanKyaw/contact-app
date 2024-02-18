@@ -1,11 +1,10 @@
-import { thunk } from "redux-thunk";
-import { authReducer } from "./reducer/auth.reducer";
-import { applyMiddleware, combineReducers, createStore } from "redux";
-import { contactReducer } from "./reducer/contact.reducer";
+import { configureStore } from "@reduxjs/toolkit";
+import contactReducer from "./reducer/contact.reducer";
+import authReducer from "./reducer/auth.reducer";
 
-const reducer = combineReducers({
-  auth: authReducer,
-  contact: contactReducer,
+export const store = configureStore({
+  reducer: {
+    contact: contactReducer,
+    auth: authReducer,
+  },
 });
-
-export const store = createStore(reducer, {}, applyMiddleware(thunk));

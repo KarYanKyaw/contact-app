@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Error,
   FormInput,
@@ -8,26 +9,45 @@ import {
 } from "@/components";
 import PreventRoutes from "@/components/PreventRoutes.component";
 import { Button } from "@/components/ui/button";
-import { loginAction } from "@/store/action/auth.action";
-import React, { useEffect, useState } from "react";
+import { issue, login, processing } from "@/store/reducer/auth.reducer";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { api } from "@/service/api";
 
 const LoginPage = () => {
-  const { loading, data, error } = useSelector((store) => store.auth);
+  const { loading, data, error } = useSelector((state) => state.auth);
+
+  const nav = useNavigate();
+  const dispatch = useDispatch();
+
+  const { state } = useLocation();
+  const { success, message, email, password } = state || {};
+
+  useEffect(() => {
+    if (success) {
+      setFormData({ email, password });
+    }
+  }, [success, email, password]);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const nav = useNavigate();
-  const dispatch = useDispatch();
 
   const handleInputChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    loginAction(dispatch, formData);
+    dispatch(processing());
+    const res = await api.post("/login", formData);
+    if (!res.data.success) {
+      dispatch(issue(res.data.message));
+    } else {
+      dispatch(login(res.data));
+      localStorage.setItem("auth", res.data.token);
+    }
   };
 
   useEffect(() => {
@@ -45,10 +65,18 @@ const LoginPage = () => {
               <Loading />
             ) : (
               <div className=" flex flex-col gap-4">
-                <Header
-                  header={"Welcome Back From CA!"}
-                  text={"Login an account for amazing contact management. "}
-                />
+                {success ? (
+                  <Header
+                    header={message}
+                    text={"Please login to continue!"}
+                    style={"!text-green-500"}
+                  />
+                ) : (
+                  <Header
+                    header={"Welcome Back From CA!"}
+                    text={"Login an account for amazing contact management."}
+                  />
+                )}
                 {error && <Error error={error} />}
 
                 <form onSubmit={handleSubmit}>
@@ -67,6 +95,7 @@ const LoginPage = () => {
                       type={"password"}
                       name={"password"}
                       label={"password"}
+                      required
                       placeholder="Enter Your Password"
                     />
 
@@ -74,7 +103,7 @@ const LoginPage = () => {
 
                     <Navigator
                       path={"register"}
-                      label={"Already have an acoount?"}
+                      label={"Already have an account?"}
                       type={"register"}
                     />
                   </div>

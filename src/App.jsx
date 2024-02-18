@@ -7,18 +7,16 @@ import {
   RegisterPage,
   ViewContactPage,
 } from "../src/pages/";
-import TestPage from "./pages/TestPage";
 
 const App = () => {
   return (
     <Routes>
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/test" element={<TestPage />} />
-      <Route path="/home" element={<HomePage />}>
-        <Route path="create" element={<CreateContactPage />} />
-        <Route index element={<ViewContactPage />} />
-      </Route>
       <Route path="/" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/home" element={<HomePage />}>
+        <Route index element={<ViewContactPage />} />ß
+        <Route path="create" element={<CreateContactPage />} />
+      </Route>
     </Routes>
   );
 };

@@ -1,34 +1,39 @@
+import { createSlice } from "@reduxjs/toolkit";
+
 const initialState = {
   loading: false,
-  auth: false,
-  data: null,
   error: null,
+  data: null,
 };
 
-export const authReducer = (store = initialState, action) => {
-  switch (action.type) {
-    case "process": {
-      return { ...store, loading: true };
-    }
-    case "register": {
-      return { ...store, data: action.payload };
-    }
-    case "login": {
-      return { ...store, auth: true, data: action.payload };
-    }
-    case "error": {
-      return { ...store, loading: false, error: action.payload };
-    }
-    case "reset": {
-      return { ...store, loading: false, error: null };
-    }
-    case "logout": {
-      localStorage.removeItem("auth");
-      return { ...store, loading: false, data: null };
-    }
+export const authSlice = createSlice({
+  name: "auth",
+  initialState,
+  reducers: {
+    processing: (store) => {
+      store.loading = true;
+    },
+    login: (store, action) => {
+      store.loading = false;
+      store.data = action.payload;
+    },
+    logout: (store) => {
+      store.loading = false;
+      store.data = null;
+    },
+    // issue means error
+    issue: (store, action) => {
+      store.loading = false;
+      store.error = action.payload;
+    },
+    reset: (store) => {
+      store.loading = false;
+      store.error = null;
+      store.data = null;
+    },
+  },
+});
 
-    default: {
-      return store;
-    }
-  }
-};
+export const { processing, issue, login,reset, logout } = authSlice.actions;
+
+export default authSlice.reducer;

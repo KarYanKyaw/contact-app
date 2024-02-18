@@ -3,25 +3,52 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { deleteContact } from "@/store/action/contact.action";
 import { useDispatch } from "react-redux";
 import ModalBox from "./ModalBox.component";
 import { Button } from "./ui/button";
+import {
+  clearError,
+  getAll,
+  issue,
+  processing,
+} from "@/store/reducer/contact.reducer";
+import { api } from "@/service/api";
 
 const ActionTrigger = ({ data }) => {
   const nav = useNavigate();
+  const dispatch = useDispatch();
+
   const handleEdit = () => {
     nav("/home/create", { state: { edit: true, data: data } });
+    // clear contact creation page error if it's existed
+    dispatch(clearError());
   };
-  const dispatch = useDispatch();
-  const handleDelete = () => {
-    deleteContact(dispatch, data.id);
+
+  const handleDelete = async (id) => {
+    try {
+      dispatch(processing());
+      const res = await api.delete(`/contact/${id}`);
+      // refetching the updated data to update ui
+      try {
+        const res = await api.get("/contact");
+        if (res.data) {
+          const contactData = res.data.contacts.data;
+          dispatch(getAll(contactData));
+          return contactData;
+        }
+      } catch (e) {
+        dispatch(issue("Fetching error"));
+      }
+      return res;
+    } catch (e) {
+      console.log(e);
+      return { error: true, message: e };
+    }
   };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -43,18 +70,16 @@ const ActionTrigger = ({ data }) => {
       <DropdownMenuContent>
         <DropdownMenuItem>
           <ModalBox
-          variant="ghost"
+            variant="ghost"
             confirm={"Yes, Delete This!"}
-            fun={handleDelete}
+            fun={() => handleDelete(data.id)}
             trigger={"Delete"}
             title={"Are you sure to delete this contact?"}
             description={"This Action can't be undone"}
           />
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleEdit()}>
-          <Button variant={"ghost"}>
-            Edit
-          </Button>
+          <Button variant={"ghost"}>Edit</Button>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

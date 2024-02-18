@@ -1,39 +1,61 @@
-import { FormInput, Header, Loading, Navigator, Wrapper ,Error} from "@/components";
+import {
+  FormInput,
+  Header,
+  Loading,
+  Navigator,
+  Wrapper,
+  Error,
+} from "@/components";
 import PreventRoutes from "@/components/PreventRoutes.component";
 import { Button } from "@/components/ui/button";
-import { registerAction } from "@/store/action/auth.action";
-import React, { useEffect, useState } from "react";
+import { api } from "@/service/api";
+import { issue, processing, reset } from "@/store/reducer/auth.reducer";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
 const RegisterPage = () => {
-  const { loading, error, data } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
+  const nav = useNavigate();
+
+  const { loading, error } = useSelector((store) => store.auth);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     password_confirmation: "",
   });
-  const nav = useNavigate();
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    registerAction(dispatch, formData);
-  };
 
   const handleInputChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  useEffect(() => {
-    if (data) {
-      nav("/home");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    dispatch(processing());
+    try {
+      const res = await api.post("/register", formData);
+      console.log(res.data)
+      if (res.data) {
+        nav("/", {
+          state: {
+            success: res.data.success,
+            message: res.data.message,
+            email: formData.email,
+            password: formData.password,
+          },
+        });
+        dispatch(reset());
+      }
+      return res;
+    } catch (e) {
+      dispatch(issue(e.response.data.message));
     }
-  }, [data]);
+  };
 
   return (
     <PreventRoutes path="/home" isAuth={localStorage.getItem("auth")}>
-      <div className="  bg-neutral-100">
+      <div className=" bg-neutral-100">
         <Wrapper>
           <div className="flex text-center min-h-screen justify-center items-center ">
             {loading ? (
@@ -45,7 +67,7 @@ const RegisterPage = () => {
                   text={"Create an account for amazing contact management. "}
                 />
                 {error && (
-                  <Error error={"Registeration Failed!"} message={error} />
+                  <Error error={"Registration Failed!"} message={error} />
                 )}
 
                 <form onSubmit={handleSubmit}>

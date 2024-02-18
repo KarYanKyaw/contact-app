@@ -1,27 +1,25 @@
+import React, { useEffect, useState } from "react";
 import { Error, FormInput, Header, Loading, Wrapper } from "@/components";
 import { Button } from "@/components/ui/button";
-import {
-  createContact,
-  editContact,
-  navigateHome,
-} from "@/store/action/contact.action";
-import React, { useEffect, useState } from "react";
+import { api } from "@/service/api";
+import { creationIssue, processing } from "@/store/reducer/contact.reducer";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const CreateContactPage = () => {
-  const { loading, error } = useSelector((store) => store.contact);
+  const { loading, creationError } = useSelector((store) => store.contact);
 
+  //using tools
   const nav = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
-  const editMode = location.state?.edit;
 
-  useEffect(() => {
-    if (editMode) {
-      const { name, email, phone, address } = location.state.data;
-      setFormData({ name, email: email || "", phone, address: address || "" });
-    }
-  }, [location]);
+  // preparing for editing
+  const editMode = location.state?.edit;
+  const id = location.state?.data?.id;
+
+  // preparing for create
+  const createMode = location.state?.create;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -29,7 +27,21 @@ const CreateContactPage = () => {
     email: "",
     address: "",
   });
-  const dispatch = useDispatch();
+
+  // deciding edit or create
+  useEffect(() => {
+    if (editMode) {
+      const { name, email, phone, address } = location.state.data;
+      setFormData({ name, phone, email: email || "", address: address || "" });
+    } else if (createMode) {
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        address: "",
+      });
+    }
+  }, [location]);
 
   const handleFormDataChange = (e) =>
     setFormData((pre) => ({ ...pre, [e.target.name]: e.target.value }));
@@ -37,14 +49,25 @@ const CreateContactPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     let res;
+    dispatch(processing());
+
     if (location.state?.edit) {
-      res = await editContact(dispatch, location.state.data.id, formData);
+      // for edit
+      try {
+        res = await api.put(`/contact/${id}`, formData);
+      } catch (e) {
+        dispatch(creationIssue(e?.response?.data?.message));
+      }
     } else {
-      res = await createContact(dispatch, formData);
+      // for creating new
+      try {
+        res = await api.post("/contact", formData);
+      } catch (e) {
+        dispatch(creationIssue(e.response.data.message));
+      }
     }
-    if (res?.status === 200) {
+    if (res.status === 200) {
       nav("/home");
-      navigateHome(dispatch);
     }
   };
   return (
@@ -58,7 +81,7 @@ const CreateContactPage = () => {
         </div>
       ) : (
         <>
-          {error && <Error error={error} />}
+          {creationError && <Error error={creationError} />}
           <form onSubmit={handleSubmit} className="mt-5 space-y-5">
             <FormInput
               onChange={handleFormDataChange}

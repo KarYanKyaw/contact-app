@@ -1,52 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { Wrapper } from ".";
 import ModalBox from "./ModalBox.component";
-import { logoutAction } from "@/store/action/auth.action";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { navigateHome } from "@/store/action/contact.action";
+import { logout } from "@/store/reducer/auth.reducer";
 
 const Navbar = () => {
-  const [route, setRoute] = useState(null);
+  // route to navigate
   const dispatch = useDispatch();
 
   const nav = useNavigate();
 
+  // logout
   const comfirmLogout = () => {
-    logoutAction(dispatch);
+    dispatch(logout());
+    localStorage.removeItem("auth");
     nav("/");
   };
 
-  const handleClick = (type) => {
-    setRoute(type);
-    navigateHome(dispatch);
+  // set the route to navigate
+  const navigateToCreatePage = () => {
+    nav("/home/create", { state: { create: true } });
   };
-
-  useEffect(() => {
-    if (route === "home") {
-      nav("/home");
-    } else if (route === "create") {
-      nav("/home/create");
-    }
-  }, [route]);
 
   return (
     <div className="bg-neutral-200 ">
       <Wrapper>
         <div className="justify-between flex py-3 items-center">
-          <p className=" font-serif text-2xl text-neutral-700">
+          <p className=" font-serif cursor-pointer select-none text-2xl text-neutral-700">
             The Contact App
           </p>
           <div className=" flex gap-3">
             <Button
               variant="link"
-              onClick={() => handleClick("home")}
+              onClick={() => nav("/")}
               className=" text-lg"
             >
               Home
             </Button>
-            <Button onClick={() => handleClick("create")}>
+            <Button onClick={() => navigateToCreatePage()}>
               Create Contact
             </Button>
             <ModalBox
